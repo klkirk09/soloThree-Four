@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 void main() {
   runApp(const MyApp());
@@ -35,8 +37,52 @@ class _DogHomePageState extends State<DogHomePage> {
 
   // TODO: Create function to fetch dog image
   Future<void> fetchDog() async {
+    if (isLoading) return;
 
+    setState(() {
+      isLoading = true;
+      errorMessage = null;
+    });
+
+    try {
+      final response = await http.get(
+        Uri.parse('https://dog.ceo/api/breeds/image/random'),
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception('Server returned ${response.statusCode}');
+      }
+
+      final decoded = jsonDecode(response.body);
+
+      if (decoded is! Map<String, dynamic>) {
+        throw Exception('Unexpected response format');
+      }
+
+      final message = decoded['message'];
+
+      if (message is! String || message.isEmpty) {
+        throw Exception('No image URL returned');
+      }
+
+      if (!mounted) return;
+      setState(() {
+        dogImageUrl = message;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        errorMessage = 'Could not fetch a dog image. Please try again.';
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +104,7 @@ class _DogHomePageState extends State<DogHomePage> {
             // TODO: Success state
 
             ElevatedButton(
-              onPressed: fetchDog,
+              onPressed: isLoading ? null : fetchDog,
               child: const Text('Fetch Dog'),
             ),
           ],
