@@ -12,6 +12,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+
       home: DogHomePage(),
     );
   }
@@ -69,12 +70,18 @@ class _DogHomePageState extends State<DogHomePage> {
       setState(() {
         dogImageUrl = message;
       });
-    } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        errorMessage = 'Could not fetch a dog image. Please try again.';
-      });
-    } finally {
+    }
+
+     catch (e, stackTrace) {
+  debugPrint('fetchDog error: $e');
+  debugPrintStack(stackTrace: stackTrace);
+  if (!mounted) return;
+  setState(() {
+  errorMessage = 'Could not fetch a dog image. Please try again.';
+  });
+}
+
+    finally {
       if (mounted) {
         setState(() {
           isLoading = false;
@@ -94,7 +101,9 @@ class _DogHomePageState extends State<DogHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-
+            if (isLoading) const CircularProgressIndicator(),
+            if (errorMessage != null) Text(errorMessage!),
+            if (dogImageUrl != null) Image.network(dogImageUrl!),
             // TODO: Empty state
 
             // TODO: Loading state
