@@ -120,6 +120,67 @@ state worked correctly.
 **Commit**:
 debugging and state implementation
 
+
+## Entry 5: Creating a class instance to store Dog objects to save- June 16, ChatGPT
+
+**Context**:
+Needed a way to store dog objects for when they are being saved for the solo 4
+requirements. 
+
+**Prompt Excerpt**:
+Generate a dog model class including fields such as id and url and 
+create a basic constructor.
+
+**AI Summary**:
+Responded with a basic dog class to build upon later. Insisted I create another separate file
+for the class to keep code modular. 
+
+**Human Evaluation**:
+The code is a sound Dog class with no extra uneccesary flourish. This will
+be instrumental to saving objects with SQLite
+
+**Final Decision**:
+Dog model class was created and added to lib.
+
+**Testing Verification**:
+Code compliles, dog class is not being used yet so extensive testing cannot be done.
+
+**Commit**:
+
+
+
+## Entry 6: Setting the skeleton for SQL database storage - June 16th, ChatGPT
+
+**Context**:
+Start implementing the storage function of the application to enforce data 
+persistence between the app closing and opening. 
+
+**Prompt Excerpt**:
+Create basic skeleton code to begin implementing database initialization, 
+a table for dogs being saved, and unimplemented functions for the creation and deletion
+of saved dogs.
+
+**AI Summary**:
+Generated a databaseHelper function with basic functions that created and opened the database,
+as well as unimplemented functions for save dog, load all dogs, delete one dog, and delete
+all dogs. 
+
+**Human Evaluation**:
+The database logic appears sound, I had to tinker with the prompting some to manage excessive 
+logic surrounding the database opening.
+
+**Final Decision**:
+The skeleton is accepted and implemented in main under the dogHomeState.
+
+**Testing Verification**:
+Main was temporarliy repalced with a function to ensure that the databse is initialized correctly.
+The code compiles safely, further testing will be conducted when the functions are implemented
+and the save Dog UI is implemented.
+
+**Commit**:
+SQLite skeleton, database setup and dog class creation
+
+
 ## TEMPLATE - date, tool
 
 **Context**:

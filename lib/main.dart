@@ -1,8 +1,19 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'dog.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:path/path.dart';
 
-void main() {
+// void main() {
+//   runApp(const MyApp());
+//
+// }
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await DatabaseHelper.instance.database;
+  debugPrint('Database opened successfully');
   runApp(const MyApp());
 }
 
@@ -120,5 +131,67 @@ class _DogHomePageState extends State<DogHomePage> {
         ),
       ),
     );
+  }
+}
+
+class DatabaseHelper {
+
+  // Singleton instance
+  static final DatabaseHelper instance = DatabaseHelper._init();
+
+  DatabaseHelper._init();
+
+  Database? _database;
+
+  // TODO: Open database
+  Future<Database> get database async {
+    if (_database != null) return _database!;
+
+    _database = await _initDB('dogs.db');
+    return _database!;
+  }
+
+  // TODO: Create database file
+  Future<Database> _initDB(String filePath) async {
+    final dbPath = await getDatabasesPath();
+    final path = join(dbPath, filePath);
+
+    return await openDatabase(
+      path,
+      version: 1,
+
+      // TODO: Create table when database is first created
+      onCreate: _createDB,
+    );
+  }
+
+  // TODO: Create saved_dogs table
+  Future _createDB(Database db, int version) async {
+    await db.execute('''
+      CREATE TABLE saved_dogs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        imageUrl TEXT NOT NULL
+      )
+    ''');
+  }
+
+  // TODO: Save a dog
+  Future<void> insertDog() async {
+
+  }
+
+  // TODO: Load all saved dogs
+  Future<List<dynamic>> getAllDogs() async {
+    return [];
+  }
+
+  // TODO: Delete one dog
+  Future<void> deleteDog(int id) async {
+
+  }
+
+  // TODO: Delete all dogs
+  Future<void> clearAllDogs() async {
+
   }
 }
