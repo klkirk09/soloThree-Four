@@ -5,17 +5,11 @@ import 'dog.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
-// void main() {
-//   runApp(const MyApp());
-//
-// }
-
-Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await DatabaseHelper.instance.database;
-  debugPrint('Database opened successfully');
+void main() {
   runApp(const MyApp());
+
 }
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -127,8 +121,33 @@ class _DogHomePageState extends State<DogHomePage> {
               onPressed: isLoading ? null : fetchDog,
               child: const Text('Fetch Dog'),
             ),
+            OutlinedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const SavedDogsPage()),
+                );
+              },
+              child: const Text('View Saved Dogs'),
+            ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class SavedDogsPage extends StatelessWidget {
+  const SavedDogsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Saved Dogs'),
+      ),
+      body: const Center(
+        child: Text('No saved dogs yet.'),
       ),
     );
   }
