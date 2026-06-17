@@ -182,36 +182,66 @@ SQLite skeleton, database setup and dog class creation
 
 
 
+## Entry 7: Save and Load favorite dogs  - June 16th, ChatGPT
+
+**Context**:
+Needed to be able to save dogs from the fetch dogs page to add them to the saved dogs database.
+
+**Prompt Excerpt**:
+Generate simple and efficient code to insert a dog into the SQLite database and retreive all saved 
+dogs. Additonally, generate a simple saved dogs page to display results on. 
+
+**AI Summary**:
+Generated insertDog and getAllDogs function, as well as a basic saved dogs stateful widget
+that displays all the saved dogs.
+
+**Human Evaluation**:
+This solution matches the assignment instructions by connecting the API requests to storing 
+them into a local backend. I modified some structure but the basic functionality remains the 
+same.
+
+**Final Decision**:
+The code will be implemented in full, it has good indication for the states of waiting and 
+error handling. 
+
+**Testing Verification**:
+Tested adding dogs and loading them on the saved dogs screen, both were successful even
+upon closing and reopening the application.
+
+**Commit**:
+Dog database functions: save, load all, delete, clear all
+
+
 ## TEMPLATE - date, tool
 
 **Context**:
+Users need to be able to remove singular dogs and clear all saved dogs 
+from the saved dogs page. This meets assignment requirements by allowing the user to modify
+the saved dog list. 
+
 
 **Prompt Excerpt**:
+Implement the delete one and clear dogs functions in the database helper class. 
+Delete dog should remove one dog by ID from the database and clear all dogs should clear
+the database. ensure to use the SQLite database package for the operations. 
+
 
 **AI Summary**:
+Provided the above code and suggested the addition of the delete one button to each
+listTile and the clear all functionality in the app bar
 
 **Human Evaluation**:
+The suggested approach seemed reasonable and fit well into already existing UI.
+I took the suggestion and put the trashcan in the listTile element and 
+the clear all button in the top right of the appbar
 
 **Final Decision**:
+Implemented deleteDog and clearAllDogs functionality and connected them via 
+buttons to the saved dogs interface. 
 
 **Testing Verification**:
+The deletedog and clear all dogs buttons were tested many times with opening and 
+closing the app also tested to ensure the state was recorded correctly. 
 
 **Commit**:
-
-
-
-## TEMPLATE - date, tool
-
-**Context**:
-
-**Prompt Excerpt**:
-
-**AI Summary**:
-
-**Human Evaluation**:
-
-**Final Decision**:
-
-**Testing Verification**:
-
-**Commit**:
+Dog database functions: save, load all, delete, clear all

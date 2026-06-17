@@ -109,14 +109,22 @@ class _DogHomePageState extends State<DogHomePage> {
             if (isLoading) const CircularProgressIndicator(),
             if (errorMessage != null) Text(errorMessage!),
             if (dogImageUrl != null) Image.network(dogImageUrl!),
-            // TODO: Empty state
+            if (dogImageUrl != null) ...[
+              const SizedBox(height: 12),
+              ElevatedButton(
+                onPressed: () async {
+                  await DatabaseHelper.instance.insertDog(
+                    Dog(imageUrl: dogImageUrl!),
+                  );
 
-            // TODO: Loading state
-
-            // TODO: Error state
-
-            // TODO: Success state
-
+                  if (!mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Dog saved')),
+                  );
+                },
+                child: const Text('Save Favorite'),
+              ),
+            ],
             ElevatedButton(
               onPressed: isLoading ? null : fetchDog,
               child: const Text('Fetch Dog'),
@@ -130,6 +138,7 @@ class _DogHomePageState extends State<DogHomePage> {
               },
               child: const Text('View Saved Dogs'),
             ),
+
           ],
         ),
       ),
@@ -137,80 +146,165 @@ class _DogHomePageState extends State<DogHomePage> {
   }
 }
 
-class SavedDogsPage extends StatelessWidget {
+class SavedDogsPage extends StatefulWidget {
   const SavedDogsPage({super.key});
+
+  @override
+  State<SavedDogsPage> createState() => _SavedDogsPageState();
+}
+
+class _SavedDogsPageState extends State<SavedDogsPage> {
+  late Future<List<Dog>> _dogsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _dogsFuture = DatabaseHelper.instance.getAllDogs();
+  }
+
+  Future<void> _reloadDogs() async {
+    setState(() {
+      _dogsFuture = DatabaseHelper.instance.getAllDogs();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Saved Dogs'),
+        actions: [
+          TextButton(
+            onPressed: () async {
+              await DatabaseHelper.instance.clearAllDogs();
+              if (!mounted) return;
+              setState(() {
+                _dogsFuture = DatabaseHelper.instance.getAllDogs();
+              });
+            },
+            child: const Text('Clear All'),
+          ),
+        ],
       ),
-      body: const Center(
-        child: Text('No saved dogs yet.'),
+      body: FutureBuilder<List<Dog>>(
+        future: _dogsFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return const Center(
+              child: Text('Could not load saved dogs.'),
+            );
+          }
+
+          final dogs = snapshot.data ?? [];
+
+          if (dogs.isEmpty) {
+            return const Center(
+              child: Text('No saved dogs yet.'),
+            );
+          }
+
+          return RefreshIndicator(
+            onRefresh: _reloadDogs,
+            child: ListView.builder(
+              itemCount: dogs.length,
+              itemBuilder: (context, index) {
+                final dog = dogs[index];
+                return ListTile(
+                  leading: Image.network(
+                    dog.imageUrl,
+                    width: 60,
+                    height: 60,
+                    fit: BoxFit.cover,
+                  ),
+                  title: Text('Saved Dog #${dog.id ?? ''}'),
+                  subtitle: Text(dog.imageUrl),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.delete),
+                    onPressed: () async {
+                      if (dog.id == null) return;
+                      await DatabaseHelper.instance.deleteDog(dog.id!);
+                      if (!mounted) return;
+                      setState(() {
+                        _dogsFuture = DatabaseHelper.instance.getAllDogs();
+                      });
+                    },
+                  ),
+                );
+              },
+            ),
+          );
+        },
       ),
     );
   }
 }
 
 class DatabaseHelper {
-
-  // Singleton instance
   static final DatabaseHelper instance = DatabaseHelper._init();
 
   DatabaseHelper._init();
 
+  static const _dbName = 'dogs.db';
+  static const _tableDogs = 'saved_dogs';
+  static const _colId = 'id';
+  static const _colImageUrl = 'imageUrl';
+
   Database? _database;
 
-  // TODO: Open database
   Future<Database> get database async {
     if (_database != null) return _database!;
-
-    _database = await _initDB('dogs.db');
+    _database = await _initDB(_dbName);
     return _database!;
   }
 
-  // TODO: Create database file
   Future<Database> _initDB(String filePath) async {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, filePath);
 
-    return await openDatabase(
+    return openDatabase(
       path,
       version: 1,
-
-      // TODO: Create table when database is first created
       onCreate: _createDB,
     );
   }
 
-  // TODO: Create saved_dogs table
-  Future _createDB(Database db, int version) async {
+  Future<void> _createDB(Database db, int version) async {
     await db.execute('''
-      CREATE TABLE saved_dogs (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        imageUrl TEXT NOT NULL
+      CREATE TABLE $_tableDogs (
+        $_colId INTEGER PRIMARY KEY AUTOINCREMENT,
+        $_colImageUrl TEXT NOT NULL
       )
     ''');
   }
 
-  // TODO: Save a dog
-  Future<void> insertDog() async {
-
+  Future<int> insertDog(Dog dog) async {
+    final db = await database;
+    return db.insert(_tableDogs, {
+      _colImageUrl: dog.imageUrl,
+    });
   }
 
-  // TODO: Load all saved dogs
-  Future<List<dynamic>> getAllDogs() async {
-    return [];
+  Future<List<Dog>> getAllDogs() async {
+    final db = await database;
+    final rows = await db.query(_tableDogs, orderBy: '$_colId DESC');
+    return rows.map((row) => Dog.fromMap(row)).toList();
   }
 
-  // TODO: Delete one dog
-  Future<void> deleteDog(int id) async {
-
+  Future<int> deleteDog(int id) async {
+    final db = await database;
+    return db.delete(
+      _tableDogs,
+      where: '$_colId = ?',
+      whereArgs: [id],
+    );
   }
 
-  // TODO: Delete all dogs
-  Future<void> clearAllDogs() async {
-
+  Future<int> clearAllDogs() async {
+    final db = await database;
+    return db.delete(_tableDogs);
   }
 }
